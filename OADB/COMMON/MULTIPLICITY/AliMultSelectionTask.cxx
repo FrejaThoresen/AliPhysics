@@ -1793,6 +1793,10 @@ Int_t AliMultSelectionTask::SetupRun(const AliVEvent* const esd)
 
     //Autodetect Period Name
     TString lPeriodName     = GetPeriodNameByRunNumber();
+    Bool_t LHC17i2a = false;
+    // LHC17i2a
+    if (LHC17i2a) lPeriodName = "LHC15o";
+
     AliWarning("Autodetecting production name via LPM tag...");
     TString lProductionName = GetPeriodNameByLPM("LPMProductionTag");
     if( lProductionName.EqualTo("") ){
@@ -1802,6 +1806,9 @@ Int_t AliMultSelectionTask::SetupRun(const AliVEvent* const esd)
 	   AliWarning("Autodetect via path seems to not have worked?"); 
 	}
     }
+    // LHC17i2a
+     if (LHC17i2a) lProductionName = lPeriodName.Data();
+
     //Autodetecting event type
     TString lEventType = GetPeriodNameByLPM("LPMInteractionType");
     if( lEventType.EqualTo("") ){
@@ -1831,6 +1838,11 @@ Int_t AliMultSelectionTask::SetupRun(const AliVEvent* const esd)
         AliWarning( Form(" Assumed to be DATA ANALYSIS on period %s",lPeriodName.Data() ));
         AliWarning("==================================================");
     }
+
+    //if (lProductionName.EqualTo("LHC17i2a")){
+     if (LHC17i2a) lEventType = "PbPb";
+    //}
+
     if ( lPeriodName.EqualTo("Empty") && fAlternateOADBFullManualBypass.EqualTo("")==kTRUE ){
         //This is uncalibrated data, skip all
         AliWarning("This is uncalibrated data, will generate empty OADB!");
@@ -1881,8 +1893,20 @@ Int_t AliMultSelectionTask::SetupRun(const AliVEvent* const esd)
         AliWarning("==================================================");
     }
 
+
     //Determine location of file to open: default OADB
     TString fileName =(Form("%s/COMMON/MULTIPLICITY/data/OADB-%s.root", AliAnalysisManager::GetOADBPath(), lPeriodName.Data() ));
+
+    //if (lProductionName.EqualTo("LHC17i2a")){
+    if (LHC17i2a) {
+      fCurrentRun = 245963;
+      lPeriodName = "LHC15o";
+      lEventType = "PbPb";
+      lProductionName = lPeriodName.Data();
+      fileName = "/home/thoresen/Programs/alice/sw/ubuntu1604_x86-64/AliPhysics/0-1/OADB/COMMON/MULTIPLICITY/data/OADB-LHC15o.root";
+    }
+
+
     AliInfo(Form("Setup Multiplicity Selection for run %d with file %s, period: %s\n",fCurrentRun,fileName.Data(),lPeriodName.Data()));
 
     TString lOADBref = lPeriodName.Data();
